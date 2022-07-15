@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -29,8 +30,9 @@ func printRules() {
 	fmt.Println("7. Computer displays -2 if two digits of the player's guess exist in the secret number and their positions are wrong.")
 	fmt.Println("8. Computer displays +2 if two digits of the player's guess exist in the secret number and their positions are correct.")
 	fmt.Println("9. Computer displays 0 if no digit of the player's guess exists in the secret number.")
-	fmt.Println("Note that if you enter repeated digits, the computer will delete them before computing the feedback.")
+	fmt.Println("Note that if you enter repeated digits, the computer will delete the second repeated digit before computing the feedback.")
 	fmt.Println("For example; if you enter 1111 computer will compute this guess as 1000")
+	fmt.Println("Or, If you enter 1122 computer will compute this guess as 1020")
 }
 
 func GenerateSecretNumber() {
@@ -128,22 +130,10 @@ func feedback(guess int) string {
 	correctPos := 0
 	wrongPosButConsist := 0
 	wrong := 0
-	deleted := 0
+	// deleted := 0
 
-	// Check if guess has repeating digits
-	for i := 0; i < 4; i++ {
-		for j := i + 1; j < 4; j++ {
-			if guess%10 == guess/10%10 {
-				// Delete the repeating digit, so that it doesn't affect the feedback
-				guess = guess / 10
-				deleted++
-
-			}
-		}
-	}
-	// add guess 0 as much as deleted digits
-	for i := 0; i < deleted; i++ {
-		guess = guess * 10
+	if HasRepeatingNum(guess) {
+		guess = DeleteRepeated(guess)
 	}
 
 	// Check if player's guess has one of the digits in the secret number but in the wrong position
@@ -220,16 +210,47 @@ func IsValid(num int) bool {
 func GetDigits(num int) (int, int, int, int) {
 
 	// get first digit of num
-	firstDigit := num / int(math.Pow10(0)) % 10
+	fourthDigit := num / int(math.Pow10(0)) % 10
 
 	// get second digit of num
-	secondDigit := num / int(math.Pow10(1)) % 10
+	thirdDigit := num / int(math.Pow10(1)) % 10
 
 	// get third digit of num
-	thirdDigit := num / int(math.Pow10(2)) % 10
+	secondDigit := num / int(math.Pow10(2)) % 10
 
 	// get fourth digit of num
-	fourthDigit := num / int(math.Pow10(3)) % 10
+	firstDigit := num / int(math.Pow10(3)) % 10
 
 	return firstDigit, secondDigit, thirdDigit, fourthDigit
+}
+
+func DeleteRepeated(num int) int {
+	firstDigit, secondDigit, thirdDigit, fourthDigit := GetDigits(num)
+
+	// check each digit of guess against the each other, if they match replace it with 0 to avoid checking it again
+	if firstDigit == secondDigit {
+		secondDigit = 0
+	}
+	if firstDigit == thirdDigit {
+		thirdDigit = 0
+	}
+	if firstDigit == fourthDigit {
+		fourthDigit = 0
+	}
+	if secondDigit == thirdDigit {
+		thirdDigit = 0
+	}
+	if secondDigit == fourthDigit {
+		fourthDigit = 0
+	}
+	if thirdDigit == fourthDigit {
+		fourthDigit = 0
+	}
+
+	newNumberStr := fmt.Sprintf("%d%d%d%d", firstDigit, secondDigit, thirdDigit, fourthDigit)
+	fmt.Println("Your guess after repeated numbers deleted: ", newNumberStr)
+	// convert it to an integer
+	newNumber, _ := strconv.Atoi(newNumberStr)
+
+	return newNumber
 }

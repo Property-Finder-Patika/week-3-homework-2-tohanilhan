@@ -7,31 +7,18 @@ import (
 	"time"
 )
 
-// Implement a number-guessing game in which the computer computes a four digit number as a secret number
-// and a player tries to guess that number correctly. Player would enter her guess and the computer would
-// produce a feedback on the positions of the digits. Four-digit number can't start with 0 and have
-// repeating digits. Let's say the computer computes 2658 as a secret number to be guessed by the player.
-// When player enters her guess such as 1234, the computer would display -1 meaning that only one digit of 1234
-// exist in the secret number and its position is wrong. When the player enters 5678 the similarly the computer
-// displays +2-1. And the game goes on until the player correctly guess the secret number and the computer
-// displays +4. The game also   keeps track of all guesses entered by the players so far and lists them
-// when it displays its feedback to the player so that the player can compute her next guess correctly.
-
 var secretNumber int
 
 func init() {
-	// Initialize the secret number to be guessed and it should create a different secret number each time the program is run
-	rand.Seed(time.Now().UnixNano())
-	secretNumber = rand.Intn(9999)
-
-	// Print the secret number to the console
-	fmt.Println("Secret number: ", secretNumber)
-
+	GenerateSecretNumber()
 }
 
 func main() {
+	// run the game
+	guessGame()
+}
 
-	fmt.Println("Welcome to the number guessing game!")
+func printRules() {
 	fmt.Println("Rules:")
 	fmt.Println("1. The secret number is a four digit number that cannot start with 0 and can have repeating digits.")
 	fmt.Println("2. The player enters a four digit number and the computer displays the feedback on the positions of the digits.")
@@ -44,42 +31,97 @@ func main() {
 	fmt.Println("9. Computer displays 0 if no digit of the player's guess exists in the secret number.")
 	fmt.Println("Note that if you enter repeated digits, the computer will delete them before computing the feedback.")
 	fmt.Println("For example; if you enter 1111 computer will compute this guess as 1000")
+}
 
+func GenerateSecretNumber() {
+	rand.Seed(time.Now().UnixNano())
+
+	// generate a random number between 1000 and 9999 (inclusive) without repeating digits
+	secretNumber = rand.Intn(9000) + 1000
+
+	for {
+		// check if secretNum is valid
+		if !IsValid(secretNumber) {
+			// if not, generate a new number
+			secretNumber = rand.Intn(9000) + 1000
+		}
+
+		if HasRepeatingNum(secretNumber) {
+			secretNumber = rand.Intn(9000) + 1000
+		} else {
+			break
+		}
+
+	}
+
+}
+
+func guessGame() {
 	// Ask the player to guess the secret number
 	var guess int
 
 	// Variable to keep track of all guesses
 	var guesses []int
 
-	// Get the player's guess until the player guesses the secret number
+	// Get the player's input for what to do
+	choice := ""
+
 	for {
-		fmt.Print("Enter your guess: ")
-		_, err := fmt.Scan(&guess)
-		if err != nil {
-			panic(err)
+
+		fmt.Println("Secret Number: ", secretNumber)
+		fmt.Println("Welcome to the number guessing game!")
+		fmt.Println("If you want to start, type 'start'.")
+		fmt.Println("If you want to see the rules, type 'rules'.")
+		fmt.Println("If you want to quit, type 'quit'.")
+		fmt.Println("If you want to see the secret number, type 'secret'.")
+
+		fmt.Scan(&choice)
+
+		if choice == "rules" {
+			printRules()
+		} else if choice == "quit" {
+			fmt.Println("Goodbye!")
+			return
+		} else if choice == "secret" {
+			fmt.Println("Secret number: ", secretNumber)
+		} else if choice == "start" {
+			fmt.Println("Let's start!")
+			// Get the player's guess until the player guesses the secret number
+			for {
+				fmt.Print("Enter your guess: ")
+				_, err := fmt.Scan(&guess)
+				if err != nil {
+					panic(err)
+				}
+
+				// check if guess is valid
+				if !IsValid(guess) {
+					fmt.Println("Invalid guess! Guess must be four digits long and can't start with 0!")
+					continue
+				}
+
+				// Keep track of all guesses entered by the player
+				guesses = append(guesses, guess)
+
+				// Display the feedback to the player
+				fmt.Println(feedback(guess))
+
+				// Display all guesses entered by the player
+				fmt.Println("All guesses so far: ", guesses)
+
+				if guess == secretNumber {
+					fmt.Println("You won!")
+					break
+				}
+
+			}
+		} else {
+			fmt.Println("Invalid input!")
+			return
 		}
-		// check if guess is valid
-		if guess < 1000 || guess > 9999 {
-			fmt.Println("Invalid guess! Guess must be four digits long and can't start with 0!")
-			continue
-		}
-
-		// Keep track of all guesses entered by the player
-		guesses = append(guesses, guess)
-
-		// Display the feedback to the player
-		fmt.Println(feedback(guess))
-
-		// Display all guesses entered by the player
-		fmt.Println("All guesses so far: ", guesses)
-
-		if guess == secretNumber {
-			break
-		}
-
 	}
-}
 
+}
 func feedback(guess int) string {
 
 	feedback := ""
@@ -144,4 +186,50 @@ func feedback(guess int) string {
 
 	return feedback
 
+}
+
+func HasRepeatingNum(num int) bool {
+
+	// get digits of num
+	firstDigit, secondDigit, thirdDigit, fourthDigit := GetDigits(num)
+
+	// check each digit of secretNum against the other digits
+	if firstDigit == secondDigit || firstDigit == thirdDigit || firstDigit == fourthDigit {
+		// calculate a new number without repeating digits
+		return true
+	} else if secondDigit == thirdDigit || secondDigit == fourthDigit {
+		return true
+	} else if thirdDigit == fourthDigit {
+		return true
+	} else {
+		// if secretNum has no repeating digits, break the loop
+		return false
+	}
+
+}
+
+func IsValid(num int) bool {
+	// check if num is valid
+	if num < 1000 || num > 10000 {
+		return false
+	}
+	return true
+
+}
+
+func GetDigits(num int) (int, int, int, int) {
+
+	// get first digit of num
+	firstDigit := num / int(math.Pow10(0)) % 10
+
+	// get second digit of num
+	secondDigit := num / int(math.Pow10(1)) % 10
+
+	// get third digit of num
+	thirdDigit := num / int(math.Pow10(2)) % 10
+
+	// get fourth digit of num
+	fourthDigit := num / int(math.Pow10(3)) % 10
+
+	return firstDigit, secondDigit, thirdDigit, fourthDigit
 }

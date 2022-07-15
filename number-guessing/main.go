@@ -68,59 +68,56 @@ func guessGame() {
 	// Get the player's input for what to do
 	choice := ""
 
-	for {
+	fmt.Println("Secret Number: ", secretNumber)
+	fmt.Println("Welcome to the number guessing game!")
+	fmt.Println("If you want to start, type 'start'.")
+	fmt.Println("If you want to see the rules, type 'rules'.")
+	fmt.Println("If you want to quit, type 'quit'.")
+	fmt.Println("If you want to see the secret number, type 'secret'.")
 
-		fmt.Println("Secret Number: ", secretNumber)
-		fmt.Println("Welcome to the number guessing game!")
-		fmt.Println("If you want to start, type 'start'.")
-		fmt.Println("If you want to see the rules, type 'rules'.")
-		fmt.Println("If you want to quit, type 'quit'.")
-		fmt.Println("If you want to see the secret number, type 'secret'.")
+	fmt.Scan(&choice)
 
-		fmt.Scan(&choice)
-
-		if choice == "rules" {
-			printRules()
-		} else if choice == "quit" {
-			fmt.Println("Goodbye!")
-			return
-		} else if choice == "secret" {
-			fmt.Println("Secret number: ", secretNumber)
-		} else if choice == "start" {
-			fmt.Println("Let's start!")
-			// Get the player's guess until the player guesses the secret number
-			for {
-				fmt.Print("Enter your guess: ")
-				_, err := fmt.Scan(&guess)
-				if err != nil {
-					panic(err)
-				}
-
-				// check if guess is valid
-				if !IsValid(guess) {
-					fmt.Println("Invalid guess! Guess must be four digits long and can't start with 0!")
-					continue
-				}
-
-				// Keep track of all guesses entered by the player
-				guesses = append(guesses, guess)
-
-				// Display the feedback to the player
-				fmt.Println(feedback(guess))
-
-				// Display all guesses entered by the player
-				fmt.Println("All guesses so far: ", guesses)
-
-				if guess == secretNumber {
-					fmt.Println("You won!")
-					break
-				}
-
+	if choice == "rules" {
+		printRules()
+	} else if choice == "quit" {
+		fmt.Println("Goodbye!")
+		return
+	} else if choice == "secret" {
+		fmt.Println("Secret number: ", secretNumber)
+	} else if choice == "start" {
+		fmt.Println("Let's start!")
+		// Get the player's guess until the player guesses the secret number
+		for {
+			fmt.Print("Enter your guess: ")
+			_, err := fmt.Scan(&guess)
+			if err != nil {
+				panic(err)
 			}
-		} else {
-			fmt.Println("Invalid input!")
-			return
+
+			// check if guess is valid
+			if !IsValid(guess) {
+				fmt.Println("Invalid guess! Guess must be four digits long and can't start with 0!")
+				continue
+			}
+
+			// Keep track of all guesses entered by the player
+			guesses = append(guesses, guess)
+
+			// Display the feedback to the player
+			fmt.Println("Feedback: ", feedback(guess))
+
+			// Display all guesses entered by the player
+			fmt.Println("Your guesses so far: ", guesses)
+
+			if guess == secretNumber {
+				fmt.Println("You won!")
+				break
+			}
+
 		}
+	} else {
+		fmt.Println("Invalid input!")
+		return
 	}
 
 }
